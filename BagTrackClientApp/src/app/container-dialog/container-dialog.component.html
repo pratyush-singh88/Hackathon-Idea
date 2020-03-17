@@ -1,0 +1,29 @@
+<div *ngIf="!dialogOpenForQRCode">
+    <h1 mat-dialog-title><strong>{{localDialogData}}</strong></h1>
+    <div mat-dialog-content>
+        <mat-form-field>
+            <input matInput [(ngModel)]="container" placeholder="Enter container/hold from details">
+        </mat-form-field>
+    </div>
+
+    <div mat-dialog-actions>
+        <button mat-button (click)="doAction()" mat-raised-button color="primary">Add & Proceed</button>
+        <button mat-button (click)="closeDialog()" mat-flat-button color="warn">Close & Proceed</button>
+        <button mat-button (click)="cancelDialog()" mat-flat-button color="warn">Cancel</button>
+    </div>
+</div>
+
+<div *ngIf="dialogOpenForQRCode">
+    <h1 mat-dialog-title><strong>QR Code</strong></h1>
+    <div mat-dialog-content>
+        <ngx-qrcode id="qrCodeImage" [qrc-element-type]="elementType" 
+            [qrc-value] = "localDialogData">
+        </ngx-qrcode>
+    </div>
+
+    <div mat-dialog-actions>
+        <a mat-button [href]="href"  (click)="doQRCodeDownload()" style="background: blue;"
+            download>Download</a>
+        <button mat-button (click)="cancelDialog()" mat-flat-button color="warn">Cancel</button>
+    </div>
+</div>

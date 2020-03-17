@@ -1,0 +1,87 @@
+<div class="grid-container">  
+        <h1 class="mat-h1" style="text-align: left;margin-left:15px">{{action}}</h1>
+        <mat-grid-list cols="3" rowHeight="230px">  
+            <mat-grid-tile [colspan]="2" [rowspan]="1">  
+              <mat-card class="dashboard-card">  
+                <mat-card-header>  
+                  <mat-card-title>  
+                  </mat-card-title>  
+                </mat-card-header>  
+                <mat-card-content class="dashboard-card-content">  
+                    <div>
+                            <h3 style="color:green">{{message}}</h3>
+                            <h3 style="color:red">{{errors}}</h3>
+                            <form [formGroup]="flightDelayForm" autocomplete="off"
+                                (ngSubmit)="onFlightDelaySearch(flightDelayForm.value)">
+                                <mat-form-field style="margin-right:50px;">
+                                    <input matInput type="text" placeholder="airline" 
+                                        formControlName="airline" id="airline">
+                                </mat-form-field>
+                                <mat-form-field  style="margin-right:50px;">
+                                    <input matInput [matDatepicker]="date" formControlName="flightDate" 
+                                        placeholder="flight date">
+                                    <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+                                    <mat-datepicker #date></mat-datepicker>
+                                </mat-form-field>
+                                <mat-form-field style="margin-right:50px;">
+                                    <input matInput type="text" placeholder="city" 
+                                        formControlName="city" id="city">
+                                </mat-form-field>
+                                <button type="submit" mat-raised-button 
+                                    [disabled]="flightDelayForm.invalid"
+                                    style="background: green; margin-right:50px;">Search</button>
+                                <button type="button" mat-raised-button color="warn" 
+                                    style="margin-top:20px;" 
+                                    (click)="onCancel()">Cancel</button>
+                            </form>
+                    </div>  
+                </mat-card-content>  
+              </mat-card>  
+            </mat-grid-tile>
+        </mat-grid-list>
+</div>
+<div style="margin-left: 35px;" *ngIf="searchResult">
+        <table mat-table [dataSource]="dataSourceFlightDelayResponse" 
+            class="mat-elevation-z8" style="width:780px;background-color: #F1EAEA">
+            <ng-container matColumnDef="airline">
+                <th mat-header-cell *matHeaderCellDef>Airline
+                </th>
+                <td mat-cell *matCellDef="let flightDelay" style="width:150px">
+                    {{flightDelay.airline}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="flight">
+                <th mat-header-cell *matHeaderCellDef>Flight
+                </th>
+                <td mat-cell *matCellDef="let flightDelay" style="width:150px">
+                    {{flightDelay.flightNumber}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="flightDate">
+                    <th mat-header-cell *matHeaderCellDef>Date
+                    </th>
+                    <td mat-cell *matCellDef="let flightDelay" style="width:100px">
+                        {{flightDelay.flightDate}}
+                    </td>
+            </ng-container>
+            <ng-container matColumnDef="predictionDelay">
+                <th mat-header-cell *matHeaderCellDef>Delay Prediction
+                </th>
+                <td mat-cell *matCellDef="let flightDelay" style="width:150px">
+                    {{flightDelay.predictedDepartureDelay}}
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="notify">
+                <th mat-header-cell *matHeaderCellDef>
+                </th>
+                <td mat-cell *matCellDef="let flightDelay" style="width:150px">
+                    <button type="submit" mat-raised-button color="primary" 
+                    (click)="onPassengerNotification(flightDelay)">
+                        Notify Passenger
+                </button>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="dataSourceFlightDelayColumn"></tr>
+            <tr mat-row *matRowDef="let row; columns: dataSourceFlightDelayColumn"></tr>
+    </table>
+    </div>

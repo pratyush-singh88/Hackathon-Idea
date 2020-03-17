@@ -1,0 +1,66 @@
+<div fxFlex fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="20px" style="height: 50vh">
+    <div
+      fxFlex="100"
+      fxFlex.md="100"
+      fxFlex.sm="100"
+      fxFlex.xs="100"
+      fxLayout="column"
+      style="padding: 5px;"
+    >
+    <div [hidden]="!hasCameras">
+
+        <zxing-scanner #scanner  start="true"
+            (scanSuccess)="handleQrCodeResult($event)" 
+            [formats]="['QR_CODE', 'EAN_13', 'CODE_128', 'DATA_MATRIX']" 
+            class="small-video">
+        </zxing-scanner>
+
+        <h2 *ngIf="!this.selectedDevice">No camera selected.</h2>
+    </div>
+
+    <div *ngIf="scanCompleted" style="margin-top: 30px;">
+                <h3 style="color:green">{{message}}</h3>
+                <h3 style="color:red">{{errors}}</h3>
+                <h3 style="color: lightskyblue; margin-left:20px">Scanning of bag completed. Please perform the action using below option</h3>
+                <button type="submit" mat-raised-button [disabled]="repeatScan"
+                    (click)="onBagSort()"
+                    style="background: gray; margin-left:20px; margin-top:20px; 
+                    margin-right:30px; margin-bottom:30px;height:50px;">
+                    <img src="/assets/img/bag-sort.png" height="40" width="20"> Sorting</button>
+        
+                <button type="submit" mat-raised-button [disabled]="repeatScan"
+                (click)="onBagScreen()"
+                style="background: gray; margin-left:20px; margin-top:20px; 
+                margin-right:30px; margin-bottom:20px;height:50px">
+                <img src="/assets/img/bag-xray.jpg" height="40" width="20"> Screening</button>
+        
+                <button type="submit" mat-raised-button [disabled]="repeatScan"
+                (click)="onBagLoad()"
+                style="background: gray; margin-left:20px; margin-top:20px; 
+                margin-right:30px; margin-bottom:20px;height:50px">
+                <img src="/assets/img/bag-load.jpg" height="40" width="20"> Load</button>
+        
+                <button type="submit" mat-raised-button [disabled]="repeatScan"
+                (click)="onBagUnload()"
+                style="background: gray; margin-left:20px; margin-top:20px; 
+                margin-right:30px; margin-bottom:20px;height:50px">
+                <img src="/assets/img/bag-unload.png" height="40" width="20"> UnLoad</button>
+
+                <button type="submit" mat-raised-button [disabled]="!repeatScan"
+                (click)="onBagScanAgain()"
+                style="background: gray; margin-left:20px; margin-top:20px; 
+                margin-right:30px; margin-bottom:20px; height:50px;"> Scan again</button>
+
+                <button type="button" mat-raised-button color="warn" [disabled]="repeatScan"
+                    style="margin-left:20px; margin-top:20px;
+                    margin-right:20px;margin-bottom:30px;height:50px" 
+                    (click)="onCancel()">Cancel</button>
+    </div>
+    <!-- <div *ngIf="repeatScan" style="margin-top: 30px;">
+        <button type="submit" mat-raised-button 
+            (click)="onBagScanAgain()"
+            style="background: gray; margin-left:20px; margin-top:20px; 
+            margin-right:30px; margin-bottom:20px; height:50px; width: 200px;"> Scan again</button>
+    </div> -->
+</div>
+</div>

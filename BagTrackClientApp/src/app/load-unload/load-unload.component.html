@@ -1,0 +1,178 @@
+<div fxFlex fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="20px" style="height: 50vh">
+          <div
+            fxFlex="100"
+            fxFlex.md="100"
+            fxFlex.sm="100"
+            fxFlex.xs="100"
+            fxLayout="column"
+            style="padding: 5px;"
+          >
+          <div *ngIf="action != 'Bag History'">
+            <h3 style="color:gray; text-align: center;"> Bag handling operation</h3>
+            <h3 style="color:green">{{message}}</h3>
+            <h3 style="color:red">{{errors}}</h3>
+            <form [formGroup]="loadUnloadBagForm" autocomplete="off"
+                style="background: #F1EAEA;">
+                <mat-form-field style="margin-top:70px;margin-left:20px;">
+                    <input matInput type="text" placeholder="bagtagid" 
+                        formControlName="bagTagId" id="bagTagId">
+                </mat-form-field>
+                <mat-form-field  style="margin-top:70px;margin-left:20px;">
+                    <input matInput [matDatepicker]="date" formControlName="travelDate" 
+                        placeholder="traveldate">
+                    <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+                    <mat-datepicker #date></mat-datepicker>
+                </mat-form-field>
+                <br />
+                <button type="submit" mat-raised-button
+                    [disabled]="loadUnloadBagForm.invalid" 
+                    (click)="onSubmit(loadUnloadBagForm.value, 'sorting')"
+                    style="background:gray; margin-left:20px; margin-top:20px; 
+                        margin-right:30px; margin-bottom:30px;height:40px;">
+                    <img src="/assets/img/bag-sort.png" height="30" width="20"><strong>Sorting</strong></button>
+                <button type="submit" mat-raised-button 
+                    [disabled]="loadUnloadBagForm.invalid"
+                    (click)="onSubmit(loadUnloadBagForm.value, 'screening')"
+                    style="background: gray; margin-left:20px; margin-top:20px; 
+                    margin-right:30px; margin-bottom:20px;height:40px">
+                    <img src="/assets/img/bag-xray.jpg" height="30" width="20"> Screening</button>
+                <button type="submit" mat-raised-button 
+                    [disabled]="loadUnloadBagForm.invalid"
+                    (click)="onSubmit(loadUnloadBagForm.value, 'load')"
+                    style="background: gray; margin-left:20px; margin-top:20px; 
+                    margin-right:30px; margin-bottom:20px;height:40px">
+                    <img src="/assets/img/bag-load.jpg" height="30" width="20"> Load</button>
+                <button type="submit" mat-raised-button 
+                    [disabled]="loadUnloadBagForm.invalid"
+                    (click)="onSubmit(loadUnloadBagForm.value, 'unload')"
+                    style="background: gray; margin-left:20px; margin-top:20px; 
+                    margin-right:30px; margin-bottom:20px;height:40px">
+                    <img src="/assets/img/bag-unload.png" height="30" width="20"> UnLoad</button>
+                <button type="button" mat-raised-button color="warn"
+                    style="margin-left:20px; margin-top:20px;
+                    margin-right:20px;margin-bottom:30px;height:40px" 
+                    (click)="onCancel()">Cancel</button>
+            </form>
+        </div>
+        
+        <div *ngIf="action == 'Bag History' && !history">
+                <h3 style="color:gray; text-align: center;"> Bag History</h3>
+                <h3 style="color:green">{{message}}</h3>
+                <h3 style="color:red">{{errors}}</h3>
+                <form [formGroup]="loadUnloadBagForm" autocomplete="off"
+                    style="background: #F1EAEA;">
+                    <mat-form-field style="margin-top:70px;margin-left:20px;">
+                        <input matInput type="text" placeholder="bagtagid" 
+                            formControlName="bagTagId" id="bagTagId">
+                    </mat-form-field>
+                    <mat-form-field  style="margin-top:70px; margin-left:20px; margin-right:20px;">
+                        <input matInput [matDatepicker]="date" formControlName="travelDate" 
+                            placeholder="traveldate">
+                        <mat-datepicker-toggle matSuffix [for]="date"></mat-datepicker-toggle>
+                        <mat-datepicker #date></mat-datepicker>
+                    </mat-form-field>
+                    <!-- <mat-form-field style="margin-top:70px;margin-left:50px;margin-right:50px;" *ngIf="containerForLoadBag">
+                        <input matInput type="text" placeholder="container/hld" 
+                            formControlName="container" id="container">
+                    </mat-form-field> -->
+                    <br />
+                    <button type="submit" mat-raised-button
+                        [disabled]="loadUnloadBagForm.invalid" 
+                        (click)="onSubmit(loadUnloadBagForm.value, 'history')"
+                        style="background: gray; margin-left:20px; margin-top:20px; 
+                            margin-right:30px; margin-bottom:30px;height:40px;"> History</button>
+                    <button type="button" mat-raised-button color="warn"
+                        style="margin-left:20px; margin-top:20px;
+                        margin-right:20px;margin-bottom:30px;height:40px" 
+                        (click)="onCancel()">Cancel</button>
+                </form>
+        </div>
+
+        <div *ngIf="history">
+            <div style="background: #F1EAEA;
+                margin-bottom: 30px; margin-top: 30px; height: 50px;">
+                    <strong style="margin-left: 10px; margin-top: 20px;">Bag Tag : </strong>
+                    <strong style="color:magenta; margin-right: 20px; margin-top: 20px;">{{bagResMainPanel.bagTagID}}</strong>
+
+                    <strong style="margin-top: 20px;">Name : </strong>
+                    <strong style="color:magenta; margin-right: 20px; margin-top: 20px;">{{bagResMainPanel.firstName}}/{{bagResMainPanel.lastName}}</strong>
+
+                    <strong style="margin-top: 20px;">Checked Bags : </strong>
+                    <strong style="color:magenta; margin-right: 20px; margin-top: 20px;">{{bagResMainPanel.numberOfCheckedInBags}}</strong>
+
+                    <!-- <strong style="margin-top: 20px;">Flight : </strong>
+                    <strong style="color:magenta; margin-right: 20px; ">{{bagResMainPanel.departureFlight}}</strong> -->
+            </div> 
+            <mat-accordion>
+                <mat-expansion-panel 
+                        style="background: #F1EAEA; width: 750px;"
+                        (opened)="beforePanelOpened(airport)"
+                        *ngFor="let airport of airportsPanel"
+                >
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <b>{{airport}}</b>
+                      </mat-panel-title>
+                      <mat-panel-description>
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <table mat-table [dataSource]="dataSourceBagResponse" 
+                        class="mat-elevation-z8" style="background-color: #F1EAEA">
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Bag Event
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.status}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="timestamp">
+                        <th mat-header-cell *matHeaderCellDef>Event Date
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.timestamp}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="from">
+                            <th mat-header-cell *matHeaderCellDef>User
+                            </th>
+                            <td mat-cell *matCellDef="let bagResponse" style="width:100px">
+                                {{bagResponse.from}}
+                            </td>
+                    </ng-container>
+                    <ng-container matColumnDef="arrivalFlight">
+                        <th mat-header-cell *matHeaderCellDef>Arrival Flight
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.arrivalFlight}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="departureFlight">
+                        <th mat-header-cell *matHeaderCellDef>Departure Flight
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.departureFlight}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="connectionFlight">
+                        <th mat-header-cell *matHeaderCellDef>Connection Flight
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.connectionFlight}}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="loadFlight">
+                        <th mat-header-cell *matHeaderCellDef>Load Flight
+                        </th>
+                        <td mat-cell *matCellDef="let bagResponse" style="width:150px">
+                            {{bagResponse.loadFlight}}
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="dataSourceBagResponseColumn"></tr>
+                    <tr mat-row *matRowDef="let row; columns: dataSourceBagResponseColumn"></tr>
+                </table>
+            </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+
+    </div>
+</div>

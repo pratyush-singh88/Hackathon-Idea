@@ -1,0 +1,49 @@
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+      <button mat-icon-button>
+        <mat-icon (click)="sidenav.toggle()">menu</mat-icon>
+      </button>
+      <!-- <h1>Bag Track</h1> -->
+      <img src="/assets/img/bag-icon-1.png" alt="Bag Track" height="50" width="50" >
+      <span class="menu-spacer"></span>
+      <div>
+        <a mat-button [routerLink]="['/login', 'checkin']"> Bag Handling </a>
+        <a mat-button [routerLink]="['/login', 'load']"> Handling Operation </a>
+        <a mat-button [routerLink]="['/login', 'scan']"> Handling Operation (Scan)</a>
+        <!-- <a mat-button [routerLink]="['/login', 'unload']"> UnLoad Bag </a> -->
+        <!-- <a mat-button [routerLink]="['/bag', 'status']"> Bag Status </a> -->
+        <a mat-button [routerLink]="['/bag', 'history']"> Bag History </a>
+        <a mat-button [routerLink]="['/login', 'delay']"> Flight Delay </a>
+        <a mat-button (click)="onTriggerPrediction()"> Trigger Prediction </a>
+  
+      </div>
+    </mat-toolbar-row>
+  
+    <mat-toolbar-row>
+        <span style="font-size: 12px;">App to keep track of bag</span>
+      </mat-toolbar-row>
+  </mat-toolbar>
+
+  <mat-sidenav-container>
+    <mat-sidenav #sidenav>
+      <mat-nav-list>
+  
+        <a mat-list-item [routerLink]="['/login', 'checkin']"> Bag Handling </a>
+        <a mat-list-item [routerLink]="['/login', 'load']"> Handling Operation </a>
+        <a mat-list-item [routerLink]="['/login', 'scan']"> Handling Operation (Scan) </a>
+        <!-- <a mat-list-item [routerLink]="['/login', 'unload']"> UnLoad Bag </a> -->
+        <!-- <a mat-list-item [routerLink]="['/bag', 'status']"> Bag Status </a> -->
+        <a mat-list-item [routerLink]="['/bag', 'history']"> Bag History </a>
+        <a mat-list-item [routerLink]="['/login', 'delay']"> Flight Delay </a>
+        <a mat-list-item (click)="onTriggerPrediction()"> Trigger Prediction </a>
+        <a mat-list-item (click)="onLogout()" mat-list-item>Logout</a>
+  
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <div style="height: 88vh;">
+  
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
