@@ -5,6 +5,7 @@ package com.bangalorewest.bagtracker.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -47,6 +48,15 @@ public class DateTimeUtil {
 		//SimpleDateFormat sdf = new SimpleDateFormat("ddMMMyyyy");
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
 		return sdf.format(date);
+	}
+	
+	public static String getCurrentTime(String format) {
+		Calendar cal = Calendar.getInstance();
+		Date date = cal.getTime();
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		String time = sdf.format(date);
+		
+		return time;
 	}
 
 }

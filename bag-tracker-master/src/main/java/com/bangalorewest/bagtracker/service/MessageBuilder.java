@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.bangalorewest.bagtracker.constants.MessageBuilderConstants;
 import com.bangalorewest.bagtracker.dto.BagEvent;
+import com.bangalorewest.bagtracker.dto.BagHistoryDTO;
 import com.bangalorewest.bagtracker.dto.LoadUnloadBag;
 import com.bangalorewest.bagtracker.dto.PaxItinerary;
 import com.bangalorewest.bagtracker.exception.InvalidBagTagException;
@@ -166,7 +168,9 @@ public class MessageBuilder {
 		buildVElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(),
 				MessageBuilderConstants.LOCAL_BAG.getMessage());
 		//build .J element
-		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), MessageBuilderConstants.TRANSFER_BAG.getMessage());
+		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), MessageBuilderConstants.SECONDARY_CODE_S.getMessage(), 
+				MessageBuilderConstants.SCREENING_DEVICE_2.getMessage(), MessageBuilderConstants.READING_LOCATION_2.getMessage(), 
+				MessageBuilderConstants.TRANSFER_BAG.getMessage());
 		//buildOnlyCurrentSegment(validPaxItinerary, bpm);
 		buildFElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), MessageBuilderConstants.TRANSFER_BAG.getMessage());
 		buildUElement(loadUnloadBag, bpm); // ULD Container
@@ -180,7 +184,8 @@ public class MessageBuilder {
 		return bpm.toString();
 	}
 
-	private void buildJElement(PaxItinerary validPaxItinerary, StringBuilder bpm, String agentLocation, String bagType) {
+	private void buildJElement(PaxItinerary validPaxItinerary, StringBuilder bpm, String agentLocation, 
+			String secondaryCode, String scannerDevice, String readingLocation, String bagType) {
 		String[] splitSegments = splitSegments(validPaxItinerary);
 		String flightSegment = null;
 		if (bagType.equalsIgnoreCase(MessageBuilderConstants.TERMINATE_BAG.getMessage())) {
@@ -191,8 +196,10 @@ public class MessageBuilder {
 		}
 		
 		String[] splitFlights = splitFlights(flightSegment, MessageBuilderConstants.HYPHEN.getMessage());
-		bpm.append(MessageBuilderConstants.DOT_J.getMessage()).append("S//SAC/").append(splitFlights[1].substring(0, 5))
-		.append("/140235L").append("/SCR1").append(System.lineSeparator());
+		bpm.append(MessageBuilderConstants.DOT_J.getMessage()).append(secondaryCode).append("//").append(scannerDevice)
+		.append(MessageBuilderConstants.FWD_SLASH.getMessage()).append(splitFlights[1].substring(0, 5))
+		.append(MessageBuilderConstants.FWD_SLASH.getMessage()).append(DateTimeUtil.getCurrentTime("HHmmss"))
+		.append(MessageBuilderConstants.FWD_SLASH.getMessage()).append(readingLocation).append(System.lineSeparator());
 	}
 
 	private PaxItinerary validateBagTagAndFilterItineraries(LoadUnloadBag loadUnloadBag,
@@ -209,12 +216,13 @@ public class MessageBuilder {
 			}
 		}
 		if (validPaxItinerary == null) {
-			throw new InvalidBagTagException("Invalid BagTag Passed in Load/Unload request");
+			throw new InvalidBagTagException("Invalid BagTag Passed");
 		}
 		return validPaxItinerary;
 	}
 
-	public String buildBPMForUnload(LoadUnloadBag loadUnloadRequest, BagEvent bagEvent) throws InvalidBagTagException {
+	public String buildBPMForUnload(LoadUnloadBag loadUnloadRequest, BagEvent bagEvent, 
+			Map<String, List<BagHistoryDTO>> bagHistoriesMap) throws InvalidBagTagException {
 		StringBuilder bpm = new StringBuilder();
 		buildMsgType(bpm, false);
 		List<PaxItinerary> paxItineraries = bookingDAO.getBookings(loadUnloadRequest.getDateOfTravel());
@@ -230,10 +238,12 @@ public class MessageBuilder {
 
 		buildVElement(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation(), 
 				MessageBuilderConstants.LOCAL_BAG.getMessage());
-		buildJElement(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation(), MessageBuilderConstants.TRANSFER_BAG.getMessage());
+		buildJElement(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation(), MessageBuilderConstants.SECONDARY_CODE_S.getMessage(), 
+				MessageBuilderConstants.SCREENING_DEVICE_2.getMessage(), MessageBuilderConstants.READING_LOCATION_2.getMessage(), 
+				MessageBuilderConstants.TRANSFER_BAG.getMessage());
 		//buildOnlyCurrentSegment(validPaxItinerary, bpm);
 		buildFElement(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation(), MessageBuilderConstants.TRANSFER_BAG.getMessage());
-		buildUElementUnload(loadUnloadRequest, bpm);
+		buildUElementUnload(loadUnloadRequest, bpm, bagHistoriesMap);
 		buildBElement(validPaxItinerary, bpm);
 		buildOnlyInboundSegment(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation());
 		buildOElement(validPaxItinerary, bpm, loadUnloadRequest.getAgentLocation());
@@ -265,9 +275,35 @@ public class MessageBuilder {
 				.append(System.lineSeparator());
 	}
 	
-	private void buildUElementUnload(LoadUnloadBag loadUnloadRequest, StringBuilder bpm) {
-		bpm.append(MessageBuilderConstants.DOT_U.getMessage()).append("AKE12345AI")
+	private void buildUElementUnload(LoadUnloadBag loadUnloadRequest, StringBuilder bpm, Map<String, 
+			List<BagHistoryDTO>> bagHistoriesMap) {
+		bpm.append(MessageBuilderConstants.DOT_U.getMessage()).append(
+				getContainer(loadUnloadRequest.getAgentLocation(), bagHistoriesMap))
 				.append(System.lineSeparator());
+	}
+
+	private String getContainer(String agentLocation, Map<String, List<BagHistoryDTO>> bagHistoriesMap) {
+		String containerID = null;
+		if (bagHistoriesMap != null && !bagHistoriesMap.isEmpty()) {
+			for (Map.Entry<String, List<BagHistoryDTO>> entry : bagHistoriesMap.entrySet()) {
+				if (entry.getKey() != null && entry.getValue() != null && entry.getKey().equalsIgnoreCase(agentLocation)) {
+					for (BagHistoryDTO bagHistoryDTO : entry.getValue()) {
+						if (bagHistoryDTO.getMessage() != null 
+								&& bagHistoryDTO.getMessage().contains(MessageBuilderConstants.DOT_U.getMessage()) 
+								&& !bagHistoryDTO.getMessage().contains(MessageBuilderConstants.DOT_B.getMessage())) {
+							String[] splittedContainerMessage = bagHistoryDTO.getMessage().split(MessageBuilderConstants.DOT_U.getMessage());
+							if (splittedContainerMessage != null && splittedContainerMessage.length >= 2) {
+								String[] splittedSubContainerMessage = splittedContainerMessage[1].split(MessageBuilderConstants.DOT_N.getMessage());
+								if (splittedSubContainerMessage != null && splittedSubContainerMessage.length >= 1) {
+									return splittedSubContainerMessage[0].replace("||", "");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return containerID;
 	}
 
 	private void buildMsgType(StringBuilder sb, boolean isBSM) {
@@ -410,7 +446,8 @@ public class MessageBuilder {
 		buildVElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(),
 				bagType);
 		//build .J element
-		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), bagType);
+		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), MessageBuilderConstants.SECONDARY_CODE_S.getMessage(), 
+				MessageBuilderConstants.SCREENING_DEVICE_1.getMessage(), MessageBuilderConstants.READING_LOCATION_1.getMessage(), bagType);
 		//buildOnlyCurrentSegment(validPaxItinerary, bpm);
 		buildFElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), bagType);
 		//buildUElement(loadUnloadBag, bpm); // ULD Container
@@ -441,7 +478,8 @@ public class MessageBuilder {
 		buildVElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(),
 				bagType);
 		//build .J element
-		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), bagType);
+		buildJElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), MessageBuilderConstants.SECONDARY_CODE_S.getMessage(), 
+				MessageBuilderConstants.SCREENING_DEVICE_2.getMessage(), MessageBuilderConstants.READING_LOCATION_2.getMessage(), bagType);
 		//buildOnlyCurrentSegment(validPaxItinerary, bpm);
 		buildFElement(validPaxItinerary, bpm, loadUnloadBag.getAgentLocation(), bagType);
 		//buildUElement(loadUnloadBag, bpm); // ULD Container

@@ -25,6 +25,7 @@ public class BagHistoryDTO {
 	private String firstName;
 	private String lastName;
 	private Integer numberOfCheckedInBags;
+	private String message;
 
 	/**
 	 * @return the status
@@ -220,6 +221,20 @@ public class BagHistoryDTO {
 	 */
 	public void setNumberOfCheckedInBags(Integer numberOfCheckedInBags) {
 		this.numberOfCheckedInBags = numberOfCheckedInBags;
+	}
+
+	/**
+	 * @return the message
+	 */
+	public String getMessage() {
+		return message;
+	}
+
+	/**
+	 * @param message the message to set
+	 */
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

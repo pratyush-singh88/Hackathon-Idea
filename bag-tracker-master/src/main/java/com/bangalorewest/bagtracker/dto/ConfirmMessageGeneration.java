@@ -18,7 +18,7 @@ public class ConfirmMessageGeneration {
 	private String airportCode;
 	private String from;
 	private String to;
-	private Date bagDate;
+	private String bagDate;
 	private String loggedInAgent;
 
 	/**
@@ -108,14 +108,14 @@ public class ConfirmMessageGeneration {
 	/**
 	 * @return the bagDate
 	 */
-	public Date getBagDate() {
+	public String getBagDate() {
 		return bagDate;
 	}
 
 	/**
 	 * @param bagDate the bagDate to set
 	 */
-	public void setBagDate(Date bagDate) {
+	public void setBagDate(String bagDate) {
 		this.bagDate = bagDate;
 	}
 

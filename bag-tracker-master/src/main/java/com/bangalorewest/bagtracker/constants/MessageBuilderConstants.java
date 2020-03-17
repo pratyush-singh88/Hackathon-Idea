@@ -65,6 +65,18 @@ public enum MessageBuilderConstants {
 	BOARDED("Y//B"),
 	
 	CHECKEDIN("Y//C"),
+	
+	SECONDARY_CODE_R("R"),
+	
+	SECONDARY_CODE_S("S"),
+	
+	SCREENING_DEVICE_1("SAC1"),
+	
+	SCREENING_DEVICE_2("SAC2"),
+	
+	READING_LOCATION_1("SCR1"),
+	
+	READING_LOCATION_2("SCR2"),
 
 	CABIN_CLASS_Y("Y");
 

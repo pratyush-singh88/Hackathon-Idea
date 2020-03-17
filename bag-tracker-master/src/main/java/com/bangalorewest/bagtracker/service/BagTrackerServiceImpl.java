@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -220,8 +221,10 @@ public class BagTrackerServiceImpl implements BagTrackerService {
 				bagHistoryDTO.setFrom(bagHistoryFromBlockchain.getFrom());
 				bagHistoryDTO.setDepartureFlight(departureFlight(bagHistoryFromBlockchain.getMessage()));
 				bagHistoryDTO.setLoadFlight(loadFlight((bagHistoryFromBlockchain.getMessage())));
+				bagHistoryDTO.setConnectionFlight(connectionFlight(bagHistoryFromBlockchain.getMessage()));
 				bagHistoryDTO.setBagTagID(bagHistoryFromBlockchain.getBagTagID());
 				bagHistoryDTO.setAirportCode(bagHistoryFromBlockchain.getAirportCode());
+				bagHistoryDTO.setMessage(bagHistoryFromBlockchain.getMessage());
 				
 				if (validPaxItinerary != null) {
 					bagHistoryDTO.setFirstName(validPaxItinerary.getFirstName());
@@ -255,7 +258,65 @@ public class BagTrackerServiceImpl implements BagTrackerService {
 			}
 		}
 		
-		return bagHistoryDTOMap;
+		Map<String, List<BagHistoryDTO>> arrangedBagHistoryMap = arrangeBagHistoryMap(bagHistoryDTOMap, 
+				validPaxItinerary);
+		
+		return arrangedBagHistoryMap;
+	}
+
+	private Map<String, List<BagHistoryDTO>> arrangeBagHistoryMap(Map<String, List<BagHistoryDTO>> bagHistoryDTOMap,
+			PaxItinerary validPaxItinerary) {
+		Map<String, List<BagHistoryDTO>> arrangedBagHistoryMap = null;
+		if (bagHistoryDTOMap != null && !bagHistoryDTOMap.isEmpty() 
+				&& validPaxItinerary != null && validPaxItinerary.getFlight() != null) {
+			List<String> airportList = new ArrayList<String>();
+			String[] splittedSegment = validPaxItinerary.getFlight().split(MessageBuilderConstants.HASH.getMessage());
+			if (splittedSegment != null) {
+				for (int i = 0; i < splittedSegment.length; i++) {
+					String[] splittedIndivualSegment = splittedSegment[i].split(MessageBuilderConstants.HYPHEN.getMessage());
+					if (splittedIndivualSegment != null) {
+						if (airportList.isEmpty()) {
+							airportList.add(splittedIndivualSegment[2]);
+							airportList.add(splittedIndivualSegment[3]);
+						}
+						else {
+							if (!airportList.contains(splittedIndivualSegment[2])) {
+								airportList.add(splittedIndivualSegment[2]);
+							}
+							if (!airportList.contains(splittedIndivualSegment[3])) {
+								airportList.add(splittedIndivualSegment[3]);
+							}
+						}
+					}
+				}
+				
+				arrangedBagHistoryMap = new LinkedHashMap<String, List<BagHistoryDTO>>();
+				
+				for (int i = airportList.size() - 1; i >= 0; i--) {
+					arrangedBagHistoryMap.put(airportList.get(i), bagHistoryDTOMap.get(airportList.get(i)));
+				}
+			}
+		}
+		return arrangedBagHistoryMap;
+	}
+
+	private String connectionFlight(String message) {
+		if (message != null && message.contains(MessageBuilderConstants.DOT_O.getMessage())) {
+			String[] splittedMessage = message.split(MessageBuilderConstants.DOT_O.getMessage());
+			if (splittedMessage != null && splittedMessage.length >= 2) {
+				String splittedOnwardMessage = splittedMessage[1];
+				if (splittedOnwardMessage != null) {
+					String[] splittedOnwardSegment = splittedOnwardMessage.split("/");
+					if (splittedOnwardSegment != null && splittedOnwardSegment.length >= 3) {
+						return splittedOnwardSegment[0] + MessageBuilderConstants.FWD_SLASH.getMessage() 
+							+ splittedOnwardSegment[1] + MessageBuilderConstants.FWD_SLASH.getMessage() 
+							+ splittedOnwardSegment[2];
+					}
+				}
+				
+			}
+		}
+		return null;
 	}
 
 	private String loadFlight(String message) {
@@ -342,6 +403,10 @@ public class BagTrackerServiceImpl implements BagTrackerService {
 
 		ConfirmMessageGeneration confirmMsg = new ConfirmMessageGeneration();
 		confirmMsg.setMessage(bsmMessages);
+		if (paxItinerary.getListOfGeneratedBagTags() != null) {
+			confirmMsg.setBagTagID(paxItinerary.getListOfGeneratedBagTags().get(0));
+			confirmMsg.setBagDate(paxItinerary.getDateOfTravel());
+		}
 		confirmMsg.setFrom(paxItinerary.getLoggedInAgent());
 		return confirmMsg;
 
@@ -426,7 +491,8 @@ public class BagTrackerServiceImpl implements BagTrackerService {
 		// TODO Auto-generated method stub
 		List<String> bpmMessages = null;
 		BagEvent bagEvent = new BagEvent();
-		String bpmMessage = msgBuilder.buildBPMForUnload(loadUnloadRequest, bagEvent);
+		String bpmMessage = msgBuilder.buildBPMForUnload(loadUnloadRequest, bagEvent, 
+				fetchBagHistory(loadUnloadRequest.getBagTagID(), loadUnloadRequest.getDateOfTravel()));
 		
 		if (!bpmMessage.isEmpty()) {
 			bpmMessages = new ArrayList<String>();
