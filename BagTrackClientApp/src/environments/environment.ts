@@ -11,7 +11,7 @@ export const environment = {
   //triggerPredictionEndpoint: 'http://localhost:3300'
   //triggerPredictionEndpoint: 'https://angular.io/'
 
-  bagtrackServiceEndpoint: 'https://airlinemindtree.azurewebsites.net/airline-app',
+  bagtrackServiceEndpoint: 'https://airlinemindtree.azurewebsites.net/bag-tracker',
   mintoServiceEndpoint: 'https://travelswift.azurewebsites.net/minto-app',
   flightDelayEndpoint: 'https://airlinemindtree.azurewebsites.net/flightdelay',
   triggerPredictionEndpoint: 'http://swiftvm.centralus.cloudapp.azure.com:3000',
